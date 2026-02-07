@@ -5,32 +5,33 @@ services:
       dockerfile: Dockerfile
     container_name: oms-backend
     ports:
-      - "8080:8080"
+      - "8080:8080" 
     environment:
+
       - ConnectionStrings__DefaultConnection=${DB_CONNECTION_STRING}
       - ASPNETCORE_ENVIRONMENT=Development
-      # Konfiguracja CORS (pozwalamy frontendowi na połączenie)
+
       - AllowedOrigins=http://localhost:5173
     networks:
       - db-network
 
-  # --- FRONTEND (React) ---
+
   frontend:
     build:
       context: .
       dockerfile: Dockerfile.ui
     container_name: oms-frontend
     ports:
-      - "5173:5173"
+
     environment:
+
       - VITE_API_URL=http://localhost:8080
     depends_on:
       - backend
     networks:
       - db-network
 
-
 networks:
   db-network:
     external: true
-    name: db-network
+    name: db-network 
