@@ -1,0 +1,19 @@
+# Używamy Node.js do zbudowania i uruchomienia frontendu
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Kopiujemy package.json z folderu frontendu
+COPY ["OneMoreSpin.Frontend/onemorespin-ui/package.json", "OneMoreSpin.Frontend/onemorespin-ui/package-lock.json", "./"]
+
+# Instalujemy zależności
+RUN npm install
+
+# Kopiujemy kod źródłowy frontendu
+COPY "OneMoreSpin.Frontend/onemorespin-ui/" .
+
+# Otwieramy port Vite (domyślnie 5173)
+EXPOSE 5173
+
+# Uruchamiamy w trybie deweloperskim (z flagą --host żeby był dostępny z zewnątrz kontenera)
+CMD ["npm", "run", "dev", "--", "--host"]
