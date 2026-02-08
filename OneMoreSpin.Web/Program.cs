@@ -102,16 +102,25 @@ public class Program
                 };
             });
 
-
         builder.Services.Configure<EmailSenderOptions>(
             builder.Configuration.GetSection("EmailSender")
         );
         builder.Services.AddTransient<IEmailSender, SmtpEmailSender>();
-        builder.Services.AddSignalR()
+        builder
+            .Services.AddSignalR()
             .AddJsonProtocol(options =>
             {
-                options.PayloadSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
-                options.PayloadSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.Never;
+                options.PayloadSerializerOptions.PropertyNamingPolicy = System
+                    .Text
+                    .Json
+                    .JsonNamingPolicy
+                    .CamelCase;
+                options.PayloadSerializerOptions.DefaultIgnoreCondition = System
+                    .Text
+                    .Json
+                    .Serialization
+                    .JsonIgnoreCondition
+                    .Never;
             });
         builder.Services.AddSingleton<IPokerService, PokerService>();
         builder.Services.AddSingleton<IMultiplayerBlackjackService, MultiplayerBlackjackService>();
@@ -121,7 +130,11 @@ public class Program
             .AddJsonOptions(options =>
             {
                 options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
-                options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
+                options.JsonSerializerOptions.PropertyNamingPolicy = System
+                    .Text
+                    .Json
+                    .JsonNamingPolicy
+                    .CamelCase;
             });
 
         builder.Services.AddEndpointsApiExplorer();
@@ -184,6 +197,26 @@ public class Program
         });
 
         var app = builder.Build();
+        // --- POCZĄTEK AUTOMATYCZNEJ MIGRACJI ---
+        using (var scope = app.Services.CreateScope())
+        {
+            var services = scope.ServiceProvider;
+            try
+            {
+                // Pobieramy Context Bazy Danych
+                var context =
+                    services.GetRequiredService<OneMoreSpin.DAL.EF.ApplicationDbContext>();
+
+                // Ta komenda robi to samo co "dotnet ef database update"
+                context.Database.Migrate();
+                Console.WriteLine("--> Migracje bazy danych zostały wykonane pomyślnie.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"--> Błąd podczas wykonywania migracji: {ex.Message}");
+            }
+        }
+        // --- KONIEC AUTOMATYCZNEJ MIGRACJI ---
 
         if (app.Environment.IsDevelopment())
         {
