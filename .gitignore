@@ -7,4 +7,5 @@ przydatne_komendy.txt
 ecosystem.config.cjs
 ecosystem.config.js
 stripe.config.cjs
+package-lock.json
 .vs
