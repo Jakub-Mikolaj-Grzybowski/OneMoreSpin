@@ -49,7 +49,7 @@ namespace OneMoreSpin.Web.Controllers
             _logger = logger;
 
             var envUrl = Environment.GetEnvironmentVariable("CLIENT_URL");
-            _clientUrl = !string.IsNullOrEmpty(envUrl) ? envUrl : "http://91.123.188.186:5173";
+            _clientUrl = !string.IsNullOrEmpty(envUrl) ? envUrl : "http://10.147.19.25:5173";
 
             _logger.LogInformation($"[PAYMENT CONFIG] CLIENT_URL z PM2: '{envUrl}'. Używam adresu: '{_clientUrl}'");
 

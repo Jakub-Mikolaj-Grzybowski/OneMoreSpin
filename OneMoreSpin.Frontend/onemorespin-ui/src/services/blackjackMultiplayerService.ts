@@ -1,11 +1,13 @@
 import * as signalR from "@microsoft/signalr";
 import { type BlackjackTable } from "../types/blackjack";
 
+const API_ORIGIN = new URL(import.meta.env.VITE_API_BASE).origin;
+
 class BlackjackMultiplayerService {
     private connection: signalR.HubConnection;
 
     constructor() {
-        const hubUrl = "http://91.123.188.186:5000/blackjackHub";  
+        const hubUrl = `${API_ORIGIN}/blackjackHub`;  
         this.connection = new signalR.HubConnectionBuilder()
             .withUrl(hubUrl, {
                 accessTokenFactory: () => {

@@ -1,11 +1,13 @@
 import * as signalR from "@microsoft/signalr";
 import { type PokerTable } from "../types/poker";
 
+const API_ORIGIN = new URL(import.meta.env.VITE_API_BASE).origin;
+
 class PokerService {
     private connection: signalR.HubConnection;
 
     constructor() {
-        const hubUrl = "http://91.123.188.186:5000/pokerHub";
+        const hubUrl = `${API_ORIGIN}/pokerHub`;
 
         this.connection = new signalR.HubConnectionBuilder()
             .withUrl(hubUrl, {

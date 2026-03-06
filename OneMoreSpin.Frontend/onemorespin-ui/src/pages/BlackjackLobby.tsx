@@ -5,6 +5,8 @@ import * as signalR from "@microsoft/signalr";
 import '../styles/BlackjackLobby.css';
 import '../styles/GameHeader.css';
 
+const API_ORIGIN = new URL(import.meta.env.VITE_API_BASE).origin;
+
 interface TableInfo {
     id: string;
     name: string;
@@ -26,7 +28,7 @@ export const BlackjackLobby = () => {
             if (connectionRef.current) return;
 
             const newConnection = new signalR.HubConnectionBuilder()
-                .withUrl("http://91.123.188.186:5000/blackjackHub", {  
+                .withUrl(`${API_ORIGIN}/blackjackHub`, {
                     accessTokenFactory: () => localStorage.getItem("jwt") || ""
                 })
                 .withAutomaticReconnect()
