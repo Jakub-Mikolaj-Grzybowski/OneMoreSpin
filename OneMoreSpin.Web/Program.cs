@@ -52,8 +52,8 @@ public class Program
             .AddDefaultTokenProviders();
 
         var jwtKey = builder.Configuration["Jwt:Key"] ?? "super_secret_dev_key_change_this";
-        var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "onemorespin.local";
-        var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "onemorespin.local";
+        var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "onemorespin.jakubg.org";
+        var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "onemorespin.jakubg.org";
 
         builder
             .Services.AddAuthentication(o =>

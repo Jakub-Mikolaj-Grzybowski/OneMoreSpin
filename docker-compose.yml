@@ -18,12 +18,15 @@ services:
       - EMAIL_FROMADDRESS=${EMAIL_FROMADDRESS}
       - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
       - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
-      - CLIENT_URL=${CLIENT_URL}
-      - AllowedOrigins=http://localhost:5173
+      - CLIENT_URL=${CLIENT_URL:-https://onemorespin.jakubg.org}
+      - AllowedOrigins__0=https://onemorespin.jakubg.org
+      - AllowedOrigins__1=http://localhost:5173
+    expose:
+      - "7643"
     networks:
       - db-network
     healthcheck:
-      test: ["CMD-SHELL", "cat /proc/net/tcp6 | grep -q '1F90' || exit 1"]
+      test: ["CMD-SHELL", "cat /proc/net/tcp6 | grep -q '1DDB' || exit 1"]
       interval: 30s
       timeout: 5s
       retries: 5
@@ -37,7 +40,9 @@ services:
     container_name: oms-frontend
     restart: unless-stopped
     environment:
-      - VITE_API_BASE=${VITE_API_BASE}
+      - VITE_API_BASE=${VITE_API_BASE:-https://onemorespin.jakubg.org/api}
+    expose:
+      - "5173"
     depends_on:
       - backend
     networks:

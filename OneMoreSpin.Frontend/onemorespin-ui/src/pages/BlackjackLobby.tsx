@@ -4,8 +4,9 @@ import { useLanguage } from '../contexts/LanguageContext';
 import * as signalR from "@microsoft/signalr";
 import '../styles/BlackjackLobby.css';
 import '../styles/GameHeader.css';
+import { API_BASE } from '../api';
 
-const API_ORIGIN = new URL(import.meta.env.VITE_API_BASE).origin;
+const API_ORIGIN = new URL(API_BASE).origin;
 
 interface TableInfo {
     id: string;

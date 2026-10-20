@@ -23,4 +23,7 @@ RUN dotnet publish "OneMoreSpin.Web.csproj" -c Release -o /app/publish
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
 COPY --from=build /app/publish .
+# The domain reverse proxy forwards requests to the container on this port.
+ENV ASPNETCORE_HTTP_PORTS=7643
+EXPOSE 7643
 ENTRYPOINT ["dotnet", "OneMoreSpin.Web.dll"]

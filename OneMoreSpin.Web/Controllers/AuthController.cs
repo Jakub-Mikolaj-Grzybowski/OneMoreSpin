@@ -178,7 +178,10 @@ public class AuthController : ControllerBase
             var token = await _userManager.GeneratePasswordResetTokenAsync(user);
 
 
-            var frontendUrl = "http://localhost:5173";
+            var configuredClientUrl = Environment.GetEnvironmentVariable("CLIENT_URL");
+            var frontendUrl = string.IsNullOrWhiteSpace(configuredClientUrl)
+                ? "https://onemorespin.jakubg.org"
+                : configuredClientUrl;
             var encodedToken = System.Net.WebUtility.UrlEncode(token);
             var resetLink = $"{frontendUrl}/reset-password?token={encodedToken}&email={model.Email}";
 

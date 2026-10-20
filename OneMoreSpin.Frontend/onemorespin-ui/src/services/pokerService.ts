@@ -1,7 +1,8 @@
 import * as signalR from "@microsoft/signalr";
 import { type PokerTable } from "../types/poker";
+import { API_BASE } from "../api";
 
-const API_ORIGIN = new URL(import.meta.env.VITE_API_BASE).origin;
+const API_ORIGIN = new URL(API_BASE).origin;
 
 class PokerService {
     private connection: signalR.HubConnection;

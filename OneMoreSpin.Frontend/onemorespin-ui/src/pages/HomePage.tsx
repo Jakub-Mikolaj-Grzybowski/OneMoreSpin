@@ -7,6 +7,7 @@ import rouletteIcon from "../assets/img/roulette.png";
 import blackjackIcon from "../assets/img/black-jack.png";
 import cardsIcon from "../assets/img/cards.png";
 import "../styles/HomePage.css";
+import { API_BASE } from "../api";
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
@@ -29,7 +30,7 @@ const HomePage: React.FC = () => {
   const checkAdminStatus = async () => {
     try {
       const token = localStorage.getItem("jwt");
-      const response = await fetch(`${import.meta.env.VITE_API_BASE}/admin/users`, {
+      const response = await fetch(`${API_BASE}/admin/users`, {
         method: 'GET',
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -64,7 +65,7 @@ const HomePage: React.FC = () => {
   const handleLogout = async () => {
     try {
       const token = localStorage.getItem("jwt");
-      const response = await fetch(`${import.meta.env.VITE_API_BASE}/auth/logout`, {
+      const response = await fetch(`${API_BASE}/auth/logout`, {
         method: 'POST',
         headers: { 
           'Authorization': `Bearer ${token}`,
