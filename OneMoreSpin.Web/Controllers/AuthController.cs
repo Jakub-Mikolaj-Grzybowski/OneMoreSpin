@@ -40,8 +40,17 @@ public class AuthController : ControllerBase
 
     private string GenerateJwt(User user, IConfiguration cfg)
     {
-        var key = cfg["Jwt:Key"]!;
-        var issuer = cfg["Jwt:Issuer"]!;
+        var key = cfg["Jwt:Key"];
+        var issuer = cfg["Jwt:Issuer"];
+        var audience = cfg["Jwt:Audience"];
+
+        if (string.IsNullOrWhiteSpace(key))
+            throw new InvalidOperationException("Jwt:Key is not configured.");
+        if (string.IsNullOrWhiteSpace(issuer))
+            throw new InvalidOperationException("Jwt:Issuer is not configured.");
+        if (string.IsNullOrWhiteSpace(audience))
+            throw new InvalidOperationException("Jwt:Audience is not configured.");
+
         var creds = new SigningCredentials(
             new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key)),
             SecurityAlgorithms.HmacSha256
@@ -57,7 +66,7 @@ public class AuthController : ControllerBase
 
         var jwt = new JwtSecurityToken(
             issuer: issuer,
-            audience: issuer,
+            audience: audience,
             claims: claims,
             expires: DateTime.UtcNow.AddDays(7),
             signingCredentials: creds
@@ -177,23 +186,34 @@ public class AuthController : ControllerBase
         user.LastSeenAt = DateTime.UtcNow;
         await _userManager.UpdateAsync(user);
 
-        var token = GenerateJwt(user, cfg);
+        try
+        {
+            var token = GenerateJwt(user, cfg);
 
-        return Ok(
-            new
-            {
-                token,
-                user = new
+            return Ok(
+                new
                 {
-                    user.Id,
-                    user.Email,
-                    user.Name,
-                    user.Surname,
-                    user.IsVip,
-                    user.Balance,
-                },
-            }
-        );
+                    token,
+                    user = new
+                    {
+                        user.Id,
+                        user.Email,
+                        user.Name,
+                        user.Surname,
+                        user.IsVip,
+                        user.Balance,
+                    },
+                }
+            );
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Could not create JWT for user {UserId}", user.Id);
+            return StatusCode(
+                StatusCodes.Status500InternalServerError,
+                new { error = "Login configuration is invalid on the server." }
+            );
+        }
     }
 
 
