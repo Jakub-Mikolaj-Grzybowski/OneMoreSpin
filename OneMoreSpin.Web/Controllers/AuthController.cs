@@ -40,16 +40,14 @@ public class AuthController : ControllerBase
 
     private string GenerateJwt(User user, IConfiguration cfg)
     {
-        var key = cfg["Jwt:Key"];
-        var issuer = cfg["Jwt:Issuer"];
-        var audience = cfg["Jwt:Audience"];
+        var key = cfg["Jwt:Key"]?.Trim();
+        var issuer = cfg["Jwt:Issuer"]?.Trim() ?? "onemorespin.jakubg.org";
+        var audience = cfg["Jwt:Audience"]?.Trim() ?? "onemorespin.jakubg.org";
 
         if (string.IsNullOrWhiteSpace(key))
             throw new InvalidOperationException("Jwt:Key is not configured.");
-        if (string.IsNullOrWhiteSpace(issuer))
-            throw new InvalidOperationException("Jwt:Issuer is not configured.");
-        if (string.IsNullOrWhiteSpace(audience))
-            throw new InvalidOperationException("Jwt:Audience is not configured.");
+        if (Encoding.UTF8.GetByteCount(key) < 32)
+            throw new InvalidOperationException("Jwt:Key must contain at least 32 bytes.");
 
         var creds = new SigningCredentials(
             new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key)),
