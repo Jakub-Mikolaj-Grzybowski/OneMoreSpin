@@ -12,7 +12,6 @@ const RegisterPage: React.FC = () => {
   const [surname, setSurname] = useState("");
   const [birthDate, setBirthDate] = useState("");
   const [email, setEmail] = useState("");
-  const [confirmEmail, setConfirmEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [agreeTerms, setAgreeTerms] = useState(false);
@@ -111,7 +110,6 @@ const RegisterPage: React.FC = () => {
     }
 
     if (!emailRegex.test(email)) e.email = "Please enter a valid email";
-    if (email !== confirmEmail) e.confirmEmail = "Emails do not match";
 
     if (password.length < 6) e.password = "Password must be at least 6 characters";
     if (password !== confirmPassword) e.confirmPassword = "Passwords do not match";
@@ -251,20 +249,6 @@ const RegisterPage: React.FC = () => {
                 required
               />
               {errors.email && <small className="error">{errors.email}</small>}
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="confirmEmail">Repeat Email</label>
-              <input
-                id="confirmEmail"
-                type="email"
-                className={`form-input ${errors.confirmEmail ? "invalid" : ""}`}
-                value={confirmEmail}
-                onChange={(e) => setConfirmEmail(e.target.value)}
-                placeholder="you@example.com"
-                required
-              />
-              {errors.confirmEmail && <small className="error">{errors.confirmEmail}</small>}
             </div>
 
             <div className="form-group">

@@ -23,16 +23,19 @@ public class AuthController : ControllerBase
     private readonly UserManager<User> _userManager;
     private readonly SignInManager<User> _signInManager;
     private readonly IEmailSender _emailSender;
+    private readonly ILogger<AuthController> _logger;
 
     public AuthController(
         UserManager<User> userManager,
         SignInManager<User> signInManager,
-        IEmailSender emailSender
+        IEmailSender emailSender,
+        ILogger<AuthController> logger
     )
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _emailSender = emailSender;
+        _logger = logger;
     }
 
     private string GenerateJwt(User user, IConfiguration cfg)
@@ -95,7 +98,20 @@ public class AuthController : ControllerBase
             <p>Click below to confirm your e-mail:</p>
             <p><a href=""{confirmUrl}"">Confirm e-mail</a></p>";
 
-        await _emailSender.SendEmailAsync(user.Email!, "Confirm your e-mail", html);
+        try
+        {
+            await _emailSender.SendEmailAsync(user.Email!, "Confirm your e-mail", html);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Could not send confirmation email for user {UserId}", user.Id);
+            await _userManager.DeleteAsync(user);
+
+            return StatusCode(
+                StatusCodes.Status503ServiceUnavailable,
+                new { error = "Registration is temporarily unavailable. Email service is not configured." }
+            );
+        }
 
         return Ok(
             new { message = "Registration successful. Check your email to confirm your account." }
