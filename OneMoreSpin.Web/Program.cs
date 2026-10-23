@@ -51,7 +51,19 @@ public class Program
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
 
-        var jwtKey = builder.Configuration["Jwt:Key"] ?? "super_secret_dev_key_change_this";
+        var jwtKey = builder.Configuration["Jwt:Key"];
+        if (string.IsNullOrWhiteSpace(jwtKey))
+        {
+            if (!builder.Environment.IsDevelopment())
+            {
+                throw new InvalidOperationException(
+                    "Jwt:Key must be configured outside the Development environment."
+                );
+            }
+
+            jwtKey = "super_secret_dev_key_change_this";
+        }
+
         var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "onemorespin.jakubg.org";
         var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "onemorespin.jakubg.org";
 
@@ -184,12 +196,28 @@ public class Program
         builder.Services.AddHostedService<MissionResetService>();
         builder.Services.AddScoped<ILeaderboardService, LeaderboardService>();
 
+        var allowedOrigins = builder
+            .Configuration.GetSection("AllowedOrigins")
+            .GetChildren()
+            .Select(section => section.Value)
+            .OfType<string>()
+            .ToArray();
+
+        if (allowedOrigins.Length == 0)
+        {
+            var clientUrl = builder.Configuration["ClientUrl"];
+            if (!string.IsNullOrWhiteSpace(clientUrl))
+            {
+                allowedOrigins = new[] { clientUrl };
+            }
+        }
+
         builder.Services.AddCors(opt =>
         {
             opt.AddPolicy(
-                "SpaDev",
+                "Spa",
                 p =>
-                    p.SetIsOriginAllowed(origin => true)
+                    p.WithOrigins(allowedOrigins)
                         .AllowAnyHeader()
                         .AllowAnyMethod()
                         .AllowCredentials()
@@ -226,7 +254,7 @@ public class Program
 
         app.UseRouting();
 
-        app.UseCors("SpaDev");
+        app.UseCors("Spa");
 
         app.UseAuthentication();
         app.UseAuthorization();

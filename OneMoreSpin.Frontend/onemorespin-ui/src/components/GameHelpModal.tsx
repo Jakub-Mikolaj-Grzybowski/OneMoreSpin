@@ -1,5 +1,3 @@
-export const GameHelpModal = () => null;
-
 export interface GameHelpContent {
   title: string;
   shortDescription: string;
@@ -7,6 +5,11 @@ export interface GameHelpContent {
   actions: any[];
   tips?: string[];
 }
+
+export const GameHelpModal = (_props: {
+  content: GameHelpContent;
+  position?: string;
+}) => null;
 
 export const POKER_HELP: GameHelpContent = { 
   title: '', 

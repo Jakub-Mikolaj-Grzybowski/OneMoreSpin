@@ -5,7 +5,6 @@ import { useBlackjackGame } from '../hooks/useBlackjackGame';
 import Leaderboard from '../components/Leaderboard';
 import { GameCard, type ThemeType } from '../components/GameCard';
 import { fireConfetti } from '../utils/confetti';
-import LanguageSwitcher from '../components/LanguageSwitcher';
 import '../styles/MultiplayerBlackjackPage.css';
 import '../styles/GameHeader.css';
 
@@ -22,7 +21,6 @@ export const MultiplayerBlackjackPage = () => {
         myUserId,
         chatMessages,
         placeBet,
-        startRound,
         hit,
         stand,
         double,
