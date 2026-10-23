@@ -67,8 +67,16 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("register")]
-    public async Task<IActionResult> Register([FromBody] RegisterDto dto)
+    public async Task<IActionResult> Register(
+        [FromBody] RegisterDto dto,
+        [FromServices] IConfiguration configuration
+    )
     {
+        var requireEmailConfirmation = configuration.GetValue(
+            "Registration:RequireEmailConfirmation",
+            false
+        );
+
         var exists = await _userManager.FindByEmailAsync(dto.Email);
         if (exists != null)
             return BadRequest(new { error = "Email already registered" });
@@ -81,40 +89,52 @@ public class AuthController : ControllerBase
             Surname = dto.Surname,
             DateOfBirth = dto.DateOfBirth,
             IsActive = true,
+            EmailConfirmed = !requireEmailConfirmation,
         };
 
         var result = await _userManager.CreateAsync(user, dto.Password);
         if (!result.Succeeded)
             return BadRequest(new { errors = result.Errors.Select(e => e.Description) });
 
-        var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-        var encoded = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
-        var confirmUrl =
-            $"{Request.Scheme}://{Request.Host}/api/auth/confirm-email?userId={user.Id}&token={encoded}";
-
-        var html =
-            $@"
-            <p>Hi {user.Name},</p>
-            <p>Click below to confirm your e-mail:</p>
-            <p><a href=""{confirmUrl}"">Confirm e-mail</a></p>";
-
-        try
+        if (requireEmailConfirmation)
         {
-            await _emailSender.SendEmailAsync(user.Email!, "Confirm your e-mail", html);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Could not send confirmation email for user {UserId}", user.Id);
-            await _userManager.DeleteAsync(user);
+            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            var encoded = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+            var confirmUrl =
+                $"{Request.Scheme}://{Request.Host}/api/auth/confirm-email?userId={user.Id}&token={encoded}";
 
-            return StatusCode(
-                StatusCodes.Status503ServiceUnavailable,
-                new { error = "Registration is temporarily unavailable. Email service is not configured." }
-            );
+            var html =
+                $@"
+                <p>Hi {user.Name},</p>
+                <p>Click below to confirm your e-mail:</p>
+                <p><a href=""{confirmUrl}"">Confirm e-mail</a></p>";
+
+            try
+            {
+                await _emailSender.SendEmailAsync(user.Email!, "Confirm your e-mail", html);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Could not send confirmation email for user {UserId}", user.Id);
+                await _userManager.DeleteAsync(user);
+
+                return StatusCode(
+                    StatusCodes.Status503ServiceUnavailable,
+                    new
+                    {
+                        error = "Registration is temporarily unavailable. Email service is not configured."
+                    }
+                );
+            }
         }
 
         return Ok(
-            new { message = "Registration successful. Check your email to confirm your account." }
+            new
+            {
+                message = requireEmailConfirmation
+                    ? "Registration successful. Check your email to confirm your account."
+                    : "Registration successful. You can log in now."
+            }
         );
     }
 

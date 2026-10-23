@@ -25,6 +25,7 @@ services:
       - Jwt__Key=${JWT_KEY}
       - Jwt__Issuer=${JWT_ISSUER:-onemorespin.jakubg.org}
       - Jwt__Audience=${JWT_AUDIENCE:-onemorespin.jakubg.org}
+      - Registration__RequireEmailConfirmation=false
     ports:
       - target: 7643
         published: ${BACKEND_PORT:-7643}
