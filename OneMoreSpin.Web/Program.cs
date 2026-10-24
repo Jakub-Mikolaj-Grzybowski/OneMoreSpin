@@ -15,6 +15,7 @@ using OneMoreSpin.Services.Email;
 using OneMoreSpin.Services.Hubs;
 using OneMoreSpin.Services.Interfaces;
 using OneMoreSpin.Web.Middleware;
+using OneMoreSpin.Web.Configuration;
 using Stripe;
 
 namespace OneMoreSpin.Web;
@@ -51,21 +52,7 @@ public class Program
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
 
-        var jwtKey = builder.Configuration["Jwt:Key"];
-        if (string.IsNullOrWhiteSpace(jwtKey))
-        {
-            if (!builder.Environment.IsDevelopment())
-            {
-                throw new InvalidOperationException(
-                    "Jwt:Key must be configured outside the Development environment."
-                );
-            }
-
-            jwtKey = "super_secret_dev_key_change_this";
-        }
-
-        var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "onemorespin.jakubg.org";
-        var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "onemorespin.jakubg.org";
+        var jwtSettings = JwtSettings.Load(builder.Configuration);
 
         builder
             .Services.AddAuthentication(o =>
@@ -86,9 +73,11 @@ public class Program
                     ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
 
-                    ValidIssuer = jwtIssuer,
-                    ValidAudience = jwtAudience,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
+                    ValidIssuer = jwtSettings.Issuer,
+                    ValidAudience = jwtSettings.Audience,
+                    IssuerSigningKey = new SymmetricSecurityKey(
+                        Encoding.UTF8.GetBytes(jwtSettings.Key)
+                    ),
                 };
 
                 options.Events = new JwtBearerEvents

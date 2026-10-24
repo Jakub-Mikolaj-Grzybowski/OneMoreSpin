@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.IdentityModel.Tokens;
 using OneMoreSpin.Model.DataModels;
 using OneMoreSpin.ViewModels.VM;
+using OneMoreSpin.Web.Configuration;
 
 namespace OneMoreSpin.Web.Controllers;
 
@@ -38,19 +39,12 @@ public class AuthController : ControllerBase
         _logger = logger;
     }
 
-    private string GenerateJwt(User user, IConfiguration cfg)
+    private string GenerateJwt(User user, IConfiguration configuration)
     {
-        var key = cfg["Jwt:Key"]?.Trim();
-        var issuer = cfg["Jwt:Issuer"]?.Trim() ?? "onemorespin.jakubg.org";
-        var audience = cfg["Jwt:Audience"]?.Trim() ?? "onemorespin.jakubg.org";
-
-        if (string.IsNullOrWhiteSpace(key))
-            throw new InvalidOperationException("Jwt:Key is not configured.");
-        if (Encoding.UTF8.GetByteCount(key) < 32)
-            throw new InvalidOperationException("Jwt:Key must contain at least 32 bytes.");
+        var jwtSettings = JwtSettings.Load(configuration);
 
         var creds = new SigningCredentials(
-            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key)),
+            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Key)),
             SecurityAlgorithms.HmacSha256
         );
 
@@ -63,8 +57,8 @@ public class AuthController : ControllerBase
     };
 
         var jwt = new JwtSecurityToken(
-            issuer: issuer,
-            audience: audience,
+            issuer: jwtSettings.Issuer,
+            audience: jwtSettings.Audience,
             claims: claims,
             expires: DateTime.UtcNow.AddDays(7),
             signingCredentials: creds
